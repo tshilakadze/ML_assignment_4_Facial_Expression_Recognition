@@ -34,7 +34,7 @@ def evaluate(model, loader, criterion, device):
     return avg_loss, acc, f1
 
 
-def train_one_run(run_name, model, config):
+def train_one_run(run_name, model, config, extra_config=None):
     device = config.DEVICE
     model.to(device)
 
@@ -45,15 +45,19 @@ def train_one_run(run_name, model, config):
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
 
+    wandb_config = {
+        "lr": config.LR,
+        "batch_size": config.BATCH_SIZE,
+        "epochs": config.EPOCHS,
+        "architecture": model.__class__.__name__,
+    }
+    if extra_config:
+        wandb_config.update(extra_config)
+
     wandb.init(
         project=config.WANDB_PROJECT,
         name=run_name,
-        config={
-            "lr": config.LR,
-            "batch_size": config.BATCH_SIZE,
-            "epochs": config.EPOCHS,
-            "architecture": model.__class__.__name__,
-        },
+        config=wandb_config,
     )
     wandb.watch(model, log="all", log_freq=50)
 
