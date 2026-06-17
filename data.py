@@ -30,7 +30,7 @@ class FaceEmotionRecDataset(Dataset):
 
 
 def get_dataloaders(csv_path, batch_size=64, val_split=0.1, seed=42, augment=False):
-    base_dataset = FER2013Dataset(csv_path)
+    base_dataset = FaceEmotionRecDataset(csv_path)
 
     val_size = int(len(base_dataset) * val_split)
     train_size = len(base_dataset) - val_size
@@ -48,10 +48,10 @@ def get_dataloaders(csv_path, batch_size=64, val_split=0.1, seed=42, augment=Fal
     else:
         train_transform = None
 
-    train_ds = FER2013Dataset(csv_path, transform=train_transform)
+    train_ds = FaceEmotionRecDataset(csv_path, transform=train_transform)
     train_ds = torch.utils.data.Subset(train_ds, train_idx.indices)
 
-    val_ds = FER2013Dataset(csv_path)  # no augmentation on val
+    val_ds = FaceEmotionRecDataset(csv_path)
     val_ds = torch.utils.data.Subset(val_ds, val_idx.indices)
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
