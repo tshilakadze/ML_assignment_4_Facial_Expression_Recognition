@@ -87,8 +87,6 @@ class MediumCNN(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    """Simple conv-conv-skip block (not full ResNet, just the core idea:
-    a shortcut path so deeper stacks remain easy to optimize)."""
     def __init__(self, channels):
         super().__init__()
         self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
