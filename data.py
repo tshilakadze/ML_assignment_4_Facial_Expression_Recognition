@@ -16,8 +16,8 @@ class FaceEmotionRecDataset(Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
         pixels = np.array(row["pixels"].split(), dtype=np.float32).reshape(48, 48)
-        pixels = pixels / 255.0  # normalize to [0,1]
-        img = torch.tensor(pixels, dtype=torch.float32).unsqueeze(0)  # (1,48,48)
+        pixels = pixels / 255.0
+        img = torch.tensor(pixels, dtype=torch.float32).unsqueeze(0)
 
         if self.transform:
             img = self.transform(img)
