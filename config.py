@@ -8,7 +8,7 @@ class Config:
 
     BATCH_SIZE = 64
     EPOCHS = 20
-    LR = 1e-4
+    LR = 1e-3
     SEED = 42
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

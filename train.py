@@ -34,16 +34,26 @@ def evaluate(model, loader, criterion, device):
     return avg_loss, acc, f1
 
 
-def train_one_run(run_name, model, config, extra_config=None):
+def train_one_run(run_name, model, config, extra_config=None, augment=False, use_scheduler=False):
     device = config.DEVICE
     model.to(device)
 
     train_loader, val_loader = get_dataloaders(
-        config.DATA_PATH, config.BATCH_SIZE, config.VAL_SPLIT, config.SEED
+        config.DATA_PATH,
+        config.BATCH_SIZE,
+        config.VAL_SPLIT,
+        config.SEED,
+        augment=augment,
     )
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
+
+    scheduler = None
+    if use_scheduler:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=3
+        )
 
     wandb_config = {
         "lr": config.LR,
@@ -83,15 +93,20 @@ def train_one_run(run_name, model, config, extra_config=None):
         train_acc = correct / total
 
         val_loss, val_acc, val_f1 = evaluate(model, val_loader, criterion, device)
+        if scheduler is not None:
+            scheduler.step(val_loss)
 
-        wandb.log({
-            "epoch": epoch + 1,
-            "train_loss": train_loss,
-            "train_acc": train_acc,
-            "val_loss": val_loss,
-            "val_acc": val_acc,
-            "val_f1_macro": val_f1,
-        })
+        wandb.log(
+            {
+                "epoch": epoch + 1,
+                "train_loss": train_loss,
+                "train_acc": train_acc,
+                "val_loss": val_loss,
+                "val_acc": val_acc,
+                "val_f1_macro": val_f1,
+                "lr": optimizer.param_groups[0]["lr"],
+            }
+        )
 
         print(f"Epoch {epoch+1}/{config.EPOCHS} | "
               f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} | "
